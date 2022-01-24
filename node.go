@@ -15,6 +15,7 @@ type Stream struct {
 	Selector Selector
 	Type     string
 	Context  context.Context
+	Cancel   context.CancelFunc
 }
 
 type RunHook struct {
@@ -26,13 +27,19 @@ type RunHook struct {
 }
 
 func NewStream(node *Node, streamType string, label Label, selector Selector) *Stream {
+	ctx, cancel := context.WithCancel(context.Background())
 	return &Stream{
 		Node:     node,
 		Label:    label,
 		Selector: selector,
 		Type:     streamType,
-		Context:  context.Background(),
+		Context:  ctx,
+		Cancel:   cancel,
 	}
+}
+
+func (s *Stream) GetCancelFunc() context.CancelFunc {
+	return s.Cancel
 }
 
 func (s *Stream) Hash() int {
