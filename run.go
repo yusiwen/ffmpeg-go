@@ -238,8 +238,12 @@ func (s *Stream) ErrorToStdOut() *Stream {
 
 // for test
 func (s *Stream) Compile() *exec.Cmd {
+	return s.CompileWith("ffmpeg")
+}
+
+func (s *Stream) CompileWith(c string) *exec.Cmd {
 	args := s.GetArgs()
-	cmd := exec.CommandContext(s.Context, "ffmpeg", args...)
+	cmd := exec.CommandContext(s.Context, c, args...)
 	if a, ok := s.Context.Value("Stdin").(io.Reader); ok {
 		cmd.Stdin = a
 	}
@@ -254,6 +258,10 @@ func (s *Stream) Compile() *exec.Cmd {
 }
 
 func (s *Stream) Run() error {
+	return s.RunWith("ffmpeg")
+}
+
+func (s *Stream) RunWith(c string) error {
 	if s.Context.Value("run_hook") != nil {
 		hook := s.Context.Value("run_hook").(*RunHook)
 		go hook.f()
@@ -264,5 +272,5 @@ func (s *Stream) Run() error {
 			<-hook.done
 		}()
 	}
-	return s.Compile().Run()
+	return s.CompileWith(c).Run()
 }
